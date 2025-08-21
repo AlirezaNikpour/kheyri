@@ -1,0 +1,928 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Architect | Portfolio</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* Custom styles for the horizontal scroll page */
+        :root {
+            --bg-color: #f8f9fa;
+            --text-color: #212529;
+            --accent-color: #007bff;
+            --subtle-gray: #dee2e6;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            overflow-x: hidden;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            cursor: none; /* Hidden by default, enabled via JS for non-touch devices */
+        }
+        /* Show default cursor on mobile */
+        @media (max-width: 767px) {
+            body {
+                cursor: default;
+            }
+        }
+
+        a, .project-panel, .hamburger {
+            cursor: none;
+        }
+        @media (max-width: 767px) {
+            a, .project-panel, .hamburger {
+                cursor: pointer;
+            }
+        }
+
+        /* Effect: Subtle Grain Overlay (Light Theme) */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADIAAAAyCAMAAAAp4XiDAAAAUVBMVEWFhYWDg4N3d3dtbW17e3t1dXWBgYGHh4d5eXlzc3OLi4ubm5uVlZWPj4+NjY19fX2JiYl/f39sbGxvb29xcXGTk5NpaWl7e3uUlJSfn594eHhfX19rCIGvAAAAAXRSTlMAQObYZgAAAAlwSFlzAAAOxAAADsQBlSsOGwAAAKRJREFUOI2l00OwywAMBFE06N3/X70gQ5K8Mv52kghAgvCwMChG/A8wYhA1p2c2E4IqNEkR2hJkQmG8xG/gr3w2sOmsLz0iMvY/djx3v2gRObx3f3dyZ490kKcuYe7O38fn5-n5eZz59cnM-fXqGaCvdPDQ4-p7f0c-d38fx1vK/7wDbD4s9B9sC-c1sJ-FA9sA-sN8kMAb4f1gIMeET0kUe1eGAAAAAElFTSuQmCC');
+            opacity: 0.05;
+            filter: invert(1);
+            pointer-events: none;
+            z-index: 1001;
+        }
+
+        /* Effect: Spotlight Cursor (Reimagined for Light Theme) */
+        .spotlight {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 999;
+            background: radial-gradient(circle at var(--x) var(--y), transparent 15%, rgb(248 249 250 / 14%) 35%);
+        }
+
+        /* New Header for Logo and Mobile Menu */
+        .site-header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            padding: 1.5rem;
+            z-index: 1002;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            pointer-events: none;
+        }
+        .site-logo {
+            font-weight: 700;
+            font-size: 1.25rem;
+            pointer-events: auto;
+        }
+        .hamburger {
+            width: 30px;
+            height: 24px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            pointer-events: auto;
+        }
+        .hamburger span {
+            width: 100%;
+            height: 2px;
+            background-color: var(--text-color);
+            transition: transform 0.3s ease, opacity 0.3s ease;
+        }
+        .hamburger.is-active span:nth-child(1) { transform: translateY(11px) rotate(45deg); }
+        .hamburger.is-active span:nth-child(2) { opacity: 0; }
+        .hamburger.is-active span:nth-child(3) { transform: translateY(-11px) rotate(-45deg); }
+
+        .main-container {
+            width: 100%;
+        }
+        .scroll-track {
+            display: flex;
+            height: 100vh;
+            align-items: center;
+            will-change: transform;
+        }
+        .panel {
+            height: 100vh;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+        .project-panel {
+            width: 85vw;
+            height: 80vh;
+            margin: 0 7.5vw;
+            position: relative;
+        }
+        .panel-wrapper {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            border-radius: 1rem;
+            border: 1px solid var(--subtle-gray);
+            position: relative;
+            clip-path: polygon(0% 100%, 100% 100%, 100% 100%, 0% 100%);
+            will-change: clip-path;
+        }
+        .corner-bracket {
+            position: absolute;
+            width: 30px;
+            height: 30px;
+            border-color: var(--text-color);
+            opacity: 0;
+            transition: opacity 0.4s ease;
+        }
+        .corner-bracket.top-left { top: 1rem; left: 1rem; border-top: 2px solid; border-left: 2px solid; }
+        .corner-bracket.top-right { top: 1rem; right: 1rem; border-top: 2px solid; border-right: 2px solid; }
+        .corner-bracket.bottom-left { bottom: 1rem; left: 1rem; border-bottom: 2px solid; border-left: 2px solid; }
+        .corner-bracket.bottom-right { bottom: 1rem; right: 1rem; border-bottom: 2px solid; border-right: 2px solid; }
+
+        .project-number {
+            position: absolute;
+            top: 0rem;
+            left: 0rem;
+            font-size: 10rem;
+            font-weight: 700;
+            color: rgba(0, 0, 0, 0.04);
+            z-index: 1;
+            line-height: 1;
+            will-change: transform;
+        }
+        /* New Big Text Style */
+        .project-main-text {
+            position: absolute;
+            bottom: 1rem;
+            left: 2rem;
+            font-size: clamp(3rem, 8vw, 10rem);
+            font-weight: 700;
+            line-height: 1;
+            color: rgba(0, 0, 0, 0.08);
+            z-index: 3;
+            overflow: hidden;
+        }
+        .project-main-text .line-reveal { transform: translateY(110%); }
+
+        .image-container {
+            position: absolute;
+            top: 19%;
+            left: 0;
+            width: 90%;
+            height: 70%;
+            overflow: hidden;
+        }
+        .project-panel img {
+            height: 90%;
+            object-fit: contain;
+            z-index: 1;
+            position: absolute;
+            top: 0;
+            left: 0;
+            will-change: transform;
+            transition: transform 0.8s cubic-bezier(0.25, 1, 0.5, 1), filter 0.8s cubic-bezier(0.25, 1, 0.5, 1);
+            filter: saturate(0.2);
+        }
+        .project-panel:hover img {
+            transform: scale(1.1);
+            filter: saturate(1);
+        }
+        .panel-content {
+            position: absolute;
+            top: 2rem;
+            right: 2rem;
+            z-index: 2;
+            color: var(--text-color);
+            text-align: left;
+            padding: 1.5rem;
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 0.5rem;
+            max-width: 39%;
+        }
+        .panel-content h2, .panel-content p { overflow: hidden; }
+        .panel-content .line-reveal { transform: translateY(110%); }
+        .panel-content h2 { font-weight: 600; font-size: 1.5rem; }
+        .panel-content p { font-weight: 300; font-size: 0.9rem; }
+        .intro-panel, .outro-panel {
+            width: 100vw;
+            flex-direction: column;
+            text-align: center;
+            padding: 2rem;
+            position: relative;
+            overflow: hidden;
+        }
+        .grid-background {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 200%;
+            height: 200%;
+            background-image:
+                linear-gradient(var(--subtle-gray) 1px, transparent 1px),
+                linear-gradient(to right, var(--subtle-gray) 1px, transparent 1px);
+            background-size: 50px 50px;
+            animation: moveGrid 20s linear infinite;
+            z-index: -1;
+        }
+        @keyframes moveGrid {
+            from { transform: translate(0, 0); }
+            to { transform: translate(-50px, -50px); }
+        }
+
+        .intro-panel h1, .outro-panel h2 { font-weight: 700; font-size: 3rem; }
+        .intro-panel p, .outro-panel p { font-size: 1.25rem; }
+
+        .side-nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 100vh;
+            background-color: rgba(248, 249, 250, 0.8);
+            backdrop-filter: blur(15px);
+            border-right: 1px solid var(--subtle-gray);
+            z-index: 1000;
+            transform: translateX(-220px);
+            transition: transform 0.5s cubic-bezier(0.25, 1, 0.5, 1);
+            display: flex;
+            align-items: center;
+            padding-top: 5rem; /* Pushes content down below header */
+        }
+        .side-nav:hover { transform: translateX(0); }
+        .nav-content {
+            padding: 2rem 3rem 2rem 1.5rem;
+            color: var(--text-color);
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+        .nav-content .nav-title {
+            writing-mode: vertical-rl;
+            font-size: 1.25rem;
+            font-weight: 600;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            transition: opacity 0.4s ease;
+            position: absolute;
+            right: 1rem;
+            top: 50%;
+            transform: translateY(-50%) rotate(180deg);
+        }
+        .side-nav:hover .nav-title { opacity: 0; }
+        .nav-links {
+            width: 220px;
+            opacity: 0;
+            transition: opacity 0.4s ease 0.1s;
+            pointer-events: none;
+        }
+        .side-nav:hover .nav-links { opacity: 1; pointer-events: auto; }
+        .nav-links a {
+            display: block;
+            padding: 1rem;
+            font-size: 1.125rem;
+            font-weight: 400;
+            position: relative;
+            margin-bottom: 0.5rem;
+        }
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            bottom: 0.75rem;
+            left: 50%;
+            right: 50%;
+            height: 1px;
+            background: var(--text-color);
+            transition: left 0.3s ease, right 0.3s ease;
+        }
+        .nav-links a:hover::after { left: 1rem; right: 1rem; }
+
+        .scroll-indicator {
+            position: fixed;
+            bottom: 50px;
+            left: 5vw;
+            width: 90vw;
+            height: 2px;
+            z-index: 99;
+            background-image: repeating-linear-gradient(to right, var(--subtle-gray), var(--subtle-gray) 8px, transparent 8px, transparent 16px);
+        }
+        .indicator-line {
+            width: 100%;
+            height: 100%;
+            background: var(--text-color);
+            transform-origin: left center;
+            transform: scaleX(0);
+        }
+        .indicator-start {
+            position: absolute;
+            left: -45px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #adb5bd;
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+        .progress-number {
+            position: absolute;
+            left: 0;
+            top: -25px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            opacity: 0;
+        }
+        .scroll-indicator::after {
+            content: '→';
+            position: absolute;
+            right: -25px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #adb5bd;
+            font-size: 1.5rem;
+            line-height: 1;
+        }
+        .cursor {
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 1000;
+            pointer-events: none;
+        }
+        .cursor-dot {
+            width: 8px;
+            height: 8px;
+            background-color: var(--text-color);
+            border-radius: 50%;
+            transition: transform 0.3s ease;
+        }
+        .cursor-ring {
+            width: 40px;
+            height: 40px;
+            border: 1px solid var(--text-color);
+            border-radius: 50%;
+            position: absolute;
+            top: -16px;
+            left: -16px;
+            transform: scale(0);
+            transition: transform 0.3s ease;
+        }
+        .cursor-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 0.8rem;
+            font-weight: 600;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        .cursor.hovered .cursor-ring { transform: scale(1); }
+        .cursor.hovered .cursor-dot { transform: scale(0); }
+        .cursor.hovered-project .cursor-text { opacity: 1; }
+        .scroll-down-indicator {
+            position: absolute;
+            bottom: 50px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            color: var(--text-color);
+            opacity: 0.7;
+            z-index: 5;
+        }
+        .scroll-down-indicator span { font-size: 0.8rem; letter-spacing: 0.1em; margin-bottom: 8px; }
+        .scroll-down-line { width: 1px; height: 40px; background-color: var(--text-color); transform-origin: top center; }
+
+        /* --- MOBILE STYLES (max-width: 767px) --- */
+        @media (max-width: 767px) {
+            .spotlight, .cursor, .scroll-indicator, .side-nav {
+                display: none; /* Hide desktop-only effects and side-nav */
+            }
+            .main-container {
+                height: auto; /* Allow natural document flow */
+                padding-top: 5rem; /* Pushes content below fixed header */
+            }
+            .scroll-track {
+                display: block; /* Stack panels vertically */
+                height: auto;
+            }
+            .panel {
+                height: auto;
+                min-height: 80vh; /* Give panels some height */
+                padding: 4rem 0; /* Add vertical spacing */
+            }
+            .intro-panel, .outro-panel {
+                min-height: 100vh;
+                padding-top: 0; /* Remove extra padding since main-container has it */
+            }
+            .project-panel {
+                width: 90vw;
+                height: 70vh; /* Fixed height for consistency */
+                margin: 0 auto; /* Center panel */
+            }
+            /* BUG FIX: Reset clip-path on mobile */
+            .panel-wrapper {
+                clip-path: none;
+            }
+            .project-number {
+                font-size: 8rem;
+                top: -1rem;
+            }
+            .intro-panel h1, .outro-panel h2 { font-size: 2.5rem; }
+            .intro-panel p, .outro-panel p { font-size: 1rem; }
+            .panel-content {
+                top: auto;
+                bottom: 1rem;
+                right: 1rem;
+                left: 1rem;
+                max-width: none;
+                text-align: center;
+            }
+            .panel-content h2 { font-size: 1.5rem; }
+            .panel-content p { font-size: 0.875rem; }
+            .project-main-text {
+                font-size: 15vw;
+                bottom: 50%;
+                transform: translateY(50%);
+                left: 1rem;
+                color: rgba(0, 0, 0, 0.06);
+            }
+            .scroll-down-indicator {
+                display: none; /* Not needed for vertical scroll */
+            }
+            /* Mobile Menu Overlay */
+            .mobile-nav {
+                display: flex;
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100vw;
+                height: 100vh;
+                background-color: var(--bg-color);
+                z-index: 1001;
+                align-items: center;
+                justify-content: center;
+                transform: translateY(-100%);
+                transition: transform 0.5s cubic-bezier(0.25, 1, 0.5, 1);
+            }
+            .mobile-nav.menu-open {
+                transform: translateY(0);
+            }
+            .mobile-nav .nav-links {
+                opacity: 1;
+                pointer-events: auto;
+                text-align: center;
+            }
+            .mobile-nav .nav-links a { font-size: 2rem; }
+        }
+    </style>
+</head>
+<body>
+    <div class="spotlight"></div>
+    <div class="cursor">
+        <div class="cursor-dot"></div>
+        <div class="cursor-ring">
+            <span class="cursor-text">View</span>
+        </div>
+    </div>
+    <header class="site-header">
+        <button class="hamburger md:hidden">
+            <span></span>
+            <span></span>
+            <span></span>
+        </button>
+        <div class="site-logo">Kheyri</div>
+    </header>
+    <!-- Desktop Menu -->
+    <nav class="side-nav hidden md:flex">
+        <div class="nav-content">
+            <div class="nav-links">
+                <h2 class="text-3xl font-bold mb-12 nav-logo">Kheyri</h2>
+                <a href="#home">Home</a>
+                <a href="#projects">Projects</a>
+                <a href="#about">About</a>
+                <a href="#contact">Contact</a>
+            </div>
+            <div class="nav-title">Menu</div>
+        </div>
+    </nav>
+    <!-- Mobile Menu -->
+    <nav class="mobile-nav md:hidden">
+        <div class="nav-links">
+            <div class="site-logo text-3xl font-bold mb-12">Kheyri</div>
+            <a href="#home">Home</a>
+            <a href="#projects">Projects</a>
+            <a href="#about">About</a>
+            <a href="#contact">Contact</a>
+        </div>
+    </nav>
+
+    <div class="scroll-indicator">
+        <span class="indicator-start">Start</span>
+        <div class="indicator-line">
+            <span class="progress-number">01</span>
+        </div>
+    </div>
+    <div class="main-container">
+        <div class="scroll-track">
+            <section id="home" class="panel intro-panel">
+                <div class="grid-background"></div>
+                <h1 class="text-6xl md:text-8xl font-bold mb-4">Shohre Kheyri</h1>
+                <p class="text-xl md:text-2xl max-w-3xl font-light">Shohre Kheyri Sohi is an architect, researcher, and artist with over 15 years of
+                    international experience. Based in Barcelona and currently pursuing a PhD in
+                    Sustainable Energies at UPC, she designs projects that balance innovation,
+                    sustainability, and human experience—while also expressing her creativity through
+                    painting and music.
+                    </p>
+                <div class="scroll-down-indicator">
+                    <span>SCROLL</span>
+                    <div class="scroll-down-line"></div>
+                </div>
+            </section>
+            <section id="projects" class="panel project-panel" data-project-number="01">
+                <div class="panel-wrapper">
+                    <div class="corner-bracket top-left"></div><div class="corner-bracket top-right"></div><div class="corner-bracket bottom-left"></div><div class="corner-bracket bottom-right"></div>
+                    <div class="project-number">01</div>
+                    <div class="project-main-text"><div class="line-reveal">GHORBANI</div></div>
+                    <div class="image-container">
+                        <img src="file:///Users/nik/projects/kheyri/Ghorbani 1.jpg" alt="The Serenity House" >
+                    </div>
+                    <div class="panel-content">
+                        <h2 class="text-4xl md:text-5xl mb-2"><div class="line-reveal">Ghorbani</div></h2>
+                        <p class="text-lg md:text-xl"><div class="line-reveal">This urban residential complex is composed of six upper floors, a ground level, and two basement levels, thoughtfully designed to meet the evolving demands of contemporary city life. The project emphasizes a clean, functional layout while engaging the urban fabric with a strong architectural presence
+                            The ground floor includes controlled access for both vehicles and pedestrians, ensuring clear circulation and a sense of arrival. Below ground, the first and second basement levels are dedicated to parking and service areas, efficiently planned to maximize usability and ease of movement
+                            Each of the six residential floors features well-proportioned units, aligned along a central vertical core that contains the staircase and elevator. The floor plans are designed to allow ample daylight and cross ventilation, with carefully positioned openings and inset balconies
+                            A key feature of the project is its facade composition, which strikes a balance between simplicity and texture. The building envelope is constructed using a refined palette of materials listed below
+                            White cement panels, providing a crisp, minimal backdrop
+                            Locally sourced Persian green stone, adding regional character and tactile depth
+                            Powder-coated metal boards, introducing rhythm and durability
+                            Glass elements, enhancing transparency and visual lightness
+                            Together, these materials create a façade that is both elegant and enduring, with thoughtful layering that offers shading, privacy, and visual dynamism
+                            Crowning the project is a roof terrace, envisioned as a semi-public garden and leisure space, offering wide city views and moments of pause within a dense environment
+                            This building’s design is rooted in clarity, material honesty, and human scale—bringing a sense of calm, light, and urban dignity to its neighborhood.</div></p>
+                    </div>
+                </div>
+            </section>
+            <section class="panel project-panel" data-project-number="02">
+                <div class="panel-wrapper">
+                    <div class="corner-bracket top-left"></div><div class="corner-bracket top-right"></div><div class="corner-bracket bottom-left"></div><div class="corner-bracket bottom-right"></div>
+                    <div class="project-number">02</div>
+                    <div class="project-main-text"><div class="line-reveal">Mirzaie</div></div>
+                    <div class="image-container">
+                        <img src="file:///Users/nik/projects/kheyri/Mirzaee1 (1).jpg" alt="Urban Oasis Tower" onerror="this.onerror=null;this.src='https://placehold.co/1200x800/d1d1d1/333333?text=Image+Not+Found';">
+                    </div>
+                    <div class="panel-content">
+                        <h2 class="text-4xl md:text-5xl mb-2"><div class="line-reveal">Mirzaie</div></h2>
+                        <p class="text-lg md:text-xl"><div class="line-reveal">This urban residential complex is composed of six upper floors, a ground level, and two basement levels, thoughtfully designed to meet the evolving demands of contemporary city life. The project emphasizes a clean, functional layout while engaging the urban fabric with a strong architectural presence
+                            The ground floor includes controlled access for both vehicles and pedestrians, ensuring clear circulation and a sense of arrival. Below ground, the first and second basement levels are dedicated to parking and service areas, efficiently planned to maximize usability and ease of movement
+                            Each of the six residential floors features well-proportioned units, aligned along a central vertical core that contains the staircase and elevator. The floor plans are designed to allow ample daylight and cross ventilation, with carefully positioned openings and inset balconies
+                            A key feature of the project is its facade lightness
+                            Together, these materials create a façade that is both elegant and enduring, with thoughtful layering that offers shading, privacy, and visual dynamism
+                            Crowning the project is a roof terrace, envisioned as a semi-public garden and leisure space, offering wide city views and moments of pause within a dense environment
+                            This building’s design is rooted in clarity, material honesty, and human scale—bringing a sense of calm, light, and urban dignity to its neighborhood.</div></p>
+                    </div>
+                </div>
+            </section>
+            <section class="panel project-panel" data-project-number="03">
+                <div class="panel-wrapper">
+                    <div class="corner-bracket top-left"></div><div class="corner-bracket top-right"></div><div class="corner-bracket bottom-left"></div><div class="corner-bracket bottom-right"></div>
+                    <div class="project-number">03</div>
+                    <div class="project-main-text"><div class="line-reveal">Narimani</div></div>
+                    <div class="image-container">
+                        <img src="file:///Users/nik/projects/kheyri/Narimani 1.jpg" alt="The Coastal Retreat" onerror="this.onerror=null;this.src='https://placehold.co/1200x800/c2c2c2/333333?text=Image+Not+Found';">
+                    </div>
+                    <div class="panel-content">
+                        <h2 class="text-4xl md:text-5xl mb-2"><div class="line-reveal">Narimani</div></h2>
+                        <p class="text-lg md:text-xl"><div class="line-reveal">This urban residential complex is composed of six upper floors, a ground level, and two basement levels, thoughtfully designed to meet the evolving demands of contemporary city life. The project emphasizes a clean, functional layout while engaging the urban fabric with a strong architectural presence
+                            The ground floor includes controlled access for both vehicles and pedestrians, ensuring clear circulation and a sense of arrival. Below ground, the first and second basement levels are dedicated to parking and service areas, efficiently planned to maximize usability and ease of movement
+                            Each of the six residential floors features well-proportioned units, aligned along a central vertical core that contains the staircase and elevator. The floor plans are designed to allow ample daylight and cross ventilation, with carefully positioned openings and inset balconies
+                            A key feature of the project is its facade composition, 
+                            Glass elements, enhancing transparency and visual lightness
+                            Together, these materials create a façade that is both elegant and enduring, with thoughtful layering that offers shading, privacy, and visual dynamism
+                            Crowning the project is a roof terrace, envisioned as a semi-public garden and leisure space, offering wide city views and moments of pause within a dense environment
+                            This building’s design is rooted in clarity, material honesty, and human scale—bringing a sense of calm, light, and urban dignity to its neighborhood.</div></p>
+                    </div>
+                </div>
+            </section>
+            <section class="panel project-panel" data-project-number="04">
+                <div class="panel-wrapper">
+                    <div class="corner-bracket top-left"></div><div class="corner-bracket top-right"></div><div class="corner-bracket bottom-left"></div><div class="corner-bracket bottom-right"></div>
+                    <div class="project-number">04</div>
+                    <div class="project-main-text"><div class="line-reveal">Tare Bar</div></div>
+                    <div class="image-container">
+                        <img src="file:///Users/nik/projects/kheyri/Tare Bar 20.jpg" alt="The Innovation Hub" onerror="this.onerror=null;this.src='https://placehold.co/1200x800/b3b3b3/333333?text=Image+Not+Found';">
+                    </div>
+                    <div class="panel-content">
+                        <h2 class="text-4xl md:text-5xl mb-2"><div class="line-reveal">Tare Bar</div></h2>
+                        <p class="text-lg md:text-xl"><div class="line-reveal">This urban residential complex is composed of six upper floors, a ground level, and two basement levels, thoughtfully designed to meet the evolving demands of contemporary city life. The project emphasizes a clean, functional layout while engaging the urban fabric with a strong architectural presence
+                            The ground floor includes controlled access for both vehicles and pedestrians, ensuring clear circulation and a sense of arrival. Below ground, the first and second basement levels are dedicated to parking and service areas, efficiently planned to maximize usability and ease of movement
+                            Each of the six residential floors features well-proportioned units, aligned along a central vertical core that contains the staircase and elevator. The floor plans are designed to allow ample daylight and cross ventilation, with carefully positioned openings and inset balconies
+                            A key feature of the project is its facade composition, which strikes a balance between simplicity and texture. The building envelope is constructed using a refined palette of materials listed below
+                            White cement panels, providing a crisp, minimal backdrop
+                            Locally sourced Persian green stone, adding regional character and tactile depth
+                            Powder-coated metal boards, introducing rhythm and durability
+                            Glass elements, enhancing transparency and visual lightness
+                            Together, these materials create a façade that is both elegant and enduring, with thoughtful layering that offers shading, privacy, and visual dynamism
+                            Crowning the project is a roof terrace, envisioned as a semi-public garden and leisure space, offering wide city views and moments of pause within a dense environment
+                            This building’s design is rooted in clarity, material honesty, and human scale—bringing a sense of calm, light, and urban dignity to its neighborhood.</div></p>
+                    </div>
+                </div>
+            </section>
+            <section id="contact" class="panel outro-panel">
+                <div class="grid-background"></div>
+                <h2 class="text-5xl md:text-7xl font-bold mb-4">Let's Build Together</h2>
+                <p class="text-xl md:text-2xl max-w-3xl mb-10 font-light">Have a vision? Let's collaborate to create spaces that inspire.</p>
+                <a href="#" class="bg-gray-800 text-white font-bold py-4 px-10 rounded-full text-lg hover:bg-gray-900 transition-all duration-300 transform hover:scale-105">Contact Me</a>
+            </section>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            gsap.registerPlugin(ScrollTrigger);
+
+            const mm = gsap.matchMedia();
+
+            // --- DESKTOP ANIMATIONS (min-width: 768px) ---
+            mm.add("(min-width: 768px)", () => {
+                // --- Spotlight & Cursor Logic ---
+                const cursor = document.querySelector('.cursor');
+                const spotlight = document.querySelector('.spotlight');
+                const hoverElements = document.querySelectorAll('a, .project-panel');
+                
+                window.addEventListener('mousemove', e => {
+                    const { clientX, clientY } = e;
+                    gsap.to(cursor, { x: clientX, y: clientY, duration: 0.3, ease: 'power2.out' });
+                    spotlight.style.setProperty('--x', `${clientX}px`);
+                    spotlight.style.setProperty('--y', `${clientY}px`);
+                });
+
+                hoverElements.forEach(el => {
+                    el.addEventListener('mouseenter', () => {
+                        cursor.classList.add('hovered');
+                        if (el.classList.contains('project-panel')) {
+                            cursor.classList.add('hovered-project');
+                            gsap.to(el.querySelectorAll('.corner-bracket'), { opacity: 0.5, duration: 0.4, stagger: 0.05 });
+                        }
+                    });
+                    el.addEventListener('mouseleave', () => {
+                        cursor.classList.remove('hovered');
+                        if (el.classList.contains('project-panel')) {
+                            cursor.classList.remove('hovered-project');
+                            gsap.to(el.querySelectorAll('.corner-bracket'), { opacity: 0, duration: 0.4 });
+                        }
+                    });
+                });
+
+                // --- Staggered Logo Animation ---
+                const logo = document.querySelector('.side-nav .nav-logo');
+                const sideNav = document.querySelector('.side-nav');
+                // BUG FIX: Check if logo exists before running animation
+                if (logo) {
+                    const logoChars = logo.textContent.split('');
+                    logo.innerHTML = logoChars.map(char => `<span class="char">${char === ' ' ? '&nbsp;' : char}</span>`).join('');
+                    
+                    sideNav.addEventListener('mouseenter', () => {
+                        gsap.to('.char', {
+                            opacity: 1,
+                            y: 0,
+                            stagger: 0.05,
+                            delay: 0.2,
+                            ease: 'power2.out'
+                        });
+                    });
+                }
+
+
+                // --- Scroll Down Indicator Animation ---
+                const scrollDownLine = document.querySelector('.scroll-down-line');
+                gsap.fromTo(scrollDownLine, { scaleY: 0 }, { scaleY: 1, duration: 1.5, repeat: -1, yoyo: true, ease: 'power2.inOut' });
+                
+                // --- Main Horizontal Scroll Animation ---
+                const mainContainer = document.querySelector(".main-container");
+                const scrollTrack = document.querySelector(".scroll-track");
+                
+                const mainScrollTween = gsap.to(scrollTrack, {
+                    x: () => -(scrollTrack.scrollWidth - window.innerWidth),
+                    ease: "none",
+                    scrollTrigger: {
+                        trigger: mainContainer,
+                        start: "top top",
+                        end: () => "+=" + (scrollTrack.scrollWidth - window.innerWidth),
+                        scrub: 1.5,
+                        pin: true,
+                        invalidateOnRefresh: true,
+                        onUpdate: (self) => {
+                            if(self.progress > 0.01 && scrollDownLine.style.opacity !== '0') {
+                                gsap.to('.scroll-down-indicator', { opacity: 0, duration: 0.5 });
+                            }
+                        }
+                    }
+                });
+
+                // --- Panel Animations ---
+                const panels = gsap.utils.toArray(".project-panel");
+                const progressNumber = document.querySelector('.progress-number');
+                let currentProject = '01';
+
+                panels.forEach(panel => {
+                    const image = panel.querySelector('img');
+                    const textLines = panel.querySelectorAll('.panel-content .line-reveal');
+                    const mainText = panel.querySelector('.project-main-text .line-reveal');
+                    const wrapper = panel.querySelector('.panel-wrapper');
+                    const projectNumber = panel.dataset.projectNumber;
+                    const parallaxNum = panel.querySelector('.project-number');
+
+                    // Panel Reveal
+                    gsap.fromTo(wrapper, 
+                        { clipPath: 'polygon(0% 100%, 100% 100%, 100% 100%, 0% 100%)' }, 
+                        { clipPath: 'polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%)',
+                        ease: 'power3.inOut',
+                        scrollTrigger: {
+                            trigger: panel,
+                            start: 'left 90%',
+                            end: 'left 60%',
+                            scrub: 1,
+                            containerAnimation: mainScrollTween
+                        }
+                    });
+
+                    // Animate text lines
+                    gsap.to(textLines, {
+                        y: 0,
+                        duration: 1,
+                        ease: 'power3.out',
+                        stagger: 0.1,
+                        scrollTrigger: {
+                            trigger: panel,
+                            start: 'left 70%',
+                            end: 'left 40%',
+                            toggleActions: 'play none none reverse',
+                            containerAnimation: mainScrollTween
+                        }
+                    });
+
+                    // Animate big text
+                     gsap.to(mainText, {
+                        y: 0,
+                        duration: 1,
+                        ease: 'power3.out',
+                        scrollTrigger: {
+                            trigger: panel,
+                            start: 'left 80%',
+                            end: 'left 50%',
+                            toggleActions: 'play none none reverse',
+                            containerAnimation: mainScrollTween
+                        }
+                    });
+                    
+                    // Animate image parallax
+                    if (image) {
+                        gsap.to(image, {
+                            x: '-5%',
+                            ease: 'none',
+                            scrollTrigger: {
+                                trigger: panel,
+                                start: 'left right',
+                                end: 'right left',
+                                scrub: true,
+                                containerAnimation: mainScrollTween
+                            }
+                        });
+                    }
+
+                    // Parallax Project Number
+                    if (parallaxNum) {
+                        gsap.to(parallaxNum, {
+                            x: '50%',
+                            ease: 'none',
+                            scrollTrigger: {
+                                trigger: panel,
+                                start: 'left right',
+                                end: 'right left',
+                                scrub: true,
+                                containerAnimation: mainScrollTween
+                            }
+                        });
+                    }
+
+                    // Update Progress Number
+                    ScrollTrigger.create({
+                        trigger: panel,
+                        containerAnimation: mainScrollTween,
+                        start: "left center",
+                        end: "right center",
+                        onToggle: self => {
+                            if (self.isActive) {
+                               if (currentProject !== projectNumber) {
+                                   currentProject = projectNumber;
+                                   gsap.to(progressNumber, {
+                                       opacity: 0,
+                                       y: -10,
+                                       duration: 0.2,
+                                       onComplete: () => {
+                                           progressNumber.textContent = projectNumber;
+                                           gsap.to(progressNumber, { opacity: 1, y: 0, duration: 0.2 });
+                                       }
+                                   });
+                               }
+                            }
+                        }
+                    });
+                });
+
+                // --- Scroll Progress Indicator Animation ---
+                const indicatorLine = document.querySelector('.indicator-line');
+                gsap.to(indicatorLine, {
+                    scaleX: 1,
+                    ease: "none",
+                    scrollTrigger: {
+                        trigger: ".main-container",
+                        start: "top top",
+                        end: () => "+=" + (document.querySelector(".scroll-track").scrollWidth - window.innerWidth),
+                        scrub: 0.5,
+                        onUpdate: (self) => {
+                            gsap.set(progressNumber, {
+                               left: `${self.progress * 100}%`
+                            });
+                        }
+                    }
+                });
+
+                // --- Smooth Scrolling for Nav Links ---
+                document.querySelectorAll('.side-nav .nav-links a').forEach(anchor => {
+                    anchor.addEventListener('click', function (e) {
+                        e.preventDefault();
+                        const targetId = this.getAttribute('href');
+                        const targetElement = document.querySelector(targetId);
+                        if (targetElement) {
+                            const targetPosition = targetElement.offsetLeft; 
+                            window.scrollTo({ top: targetPosition, behavior: 'smooth' });
+                        }
+                    });
+                });
+            });
+
+            // --- MOBILE SETUP ---
+            mm.add("(max-width: 767px)", () => {
+                // Mobile menu toggle
+                const hamburger = document.querySelector('.hamburger');
+                const nav = document.querySelector('.mobile-nav');
+                hamburger.addEventListener('click', () => {
+                    hamburger.classList.toggle('is-active');
+                    nav.classList.toggle('menu-open');
+                });
+                
+                // Simple fade-in animations for vertical scroll
+                gsap.utils.toArray('.panel').forEach(panel => {
+                    gsap.from(panel, {
+                        opacity: 0,
+                        y: 50,
+                        duration: 1,
+                        ease: 'power3.out',
+                        scrollTrigger: {
+                            trigger: panel,
+                            start: 'top 80%',
+                            toggleActions: 'play none none reverse'
+                        }
+                    });
+                });
+
+                // Smooth scrolling for nav links on mobile
+                document.querySelectorAll('.mobile-nav .nav-links a').forEach(anchor => {
+                    anchor.addEventListener('click', function (e) {
+                        e.preventDefault();
+                        // Close menu on click
+                        hamburger.classList.remove('is-active');
+                        nav.classList.remove('menu-open');
+
+                        const targetId = this.getAttribute('href');
+                        const targetElement = document.querySelector(targetId);
+                        if (targetElement) {
+                            // Add a slight delay to allow the menu to start closing
+                            setTimeout(() => {
+                                targetElement.scrollIntoView({
+                                    behavior: 'smooth'
+                                });
+                            }, 300);
+                        }
+                    });
+                });
+            });
+        });
+    </script>
+</body>
+</html>
